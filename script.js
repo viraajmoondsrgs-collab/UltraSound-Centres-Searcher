@@ -1,3 +1,5 @@
+console.log("Script loaded!");
+
 const fatherCentre = {
     name: "Metro Diagnostic & Research Centre",
     lat: 28.4595,
@@ -16,9 +18,14 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 }
 
 function findNearest() {
+    console.log("Button clicked!");
     const resultsContainer = document.getElementById('results');
-    if (!resultsContainer) return;
     
+    if (!resultsContainer) {
+        alert("Error: results div not found");
+        return;
+    }
+
     resultsContainer.innerHTML = "<p>Locating...</p>";
 
     navigator.geolocation.getCurrentPosition((position) => {
@@ -29,7 +36,7 @@ function findNearest() {
         const d = calculateDistance(uLat, uLon, fatherCentre.lat, fatherCentre.lon).toFixed(2);
         
         resultsContainer.innerHTML += `
-            <div class="centre-card featured" style="border: 3px solid #007bff; padding: 20px; margin-bottom: 20px; border-radius: 10px; background: #e7f3ff;">
+            <div style="border: 3px solid #007bff; padding: 20px; margin-bottom: 20px; border-radius: 10px; background: #e7f3ff;">
                 <span style="background: #007bff; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">⭐ FEATURED</span>
                 <h2>${fatherCentre.name}</h2>
                 <p>📍 ${fatherCentre.address}</p>
@@ -58,6 +65,7 @@ function findNearest() {
                 });
             });
     }, (error) => {
-        resultsContainer.innerHTML = "Error: Please enable location access.";
+        console.error(error);
+        resultsContainer.innerHTML = "Error: " + error.message;
     });
 }
