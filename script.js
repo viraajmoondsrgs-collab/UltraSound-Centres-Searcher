@@ -56,30 +56,15 @@ function displayAll(targetLat, targetLon) {
     const resultsContainer = document.getElementById('results');
     resultsContainer.innerHTML = "";
     
-    const distToFather = calculateDistance(targetLat, targetLon, fatherCentre.lat, fatherCentre.lon).toFixed(2);
-    
     // 1. Disclaimer Notice
     resultsContainer.innerHTML += `
         <div style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ffeeba; font-size: 0.9rem;">
-            <strong>Note:</strong> While many hospitals and clinics listed below usually offer imaging, please call them directly to confirm they have an ultrasound facility available before visiting.
+            <strong>Disclaimer:</strong> Facilities listed below are based on mapping data. Please contact the centre directly to confirm ultrasound availability and appointment timings before visiting.
         </div>
+        <h3>Results Sorted by Distance:</h3>
     `;
 
-    // 2. Featured Centre (Your Dad's Place)
-    resultsContainer.innerHTML += `
-        <div class="featured-card" style="border: 3px solid #007bff; padding: 20px; margin-bottom: 20px; border-radius: 10px; background: #e7f3ff;">
-            <span style="background: #007bff; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">⭐ VERIFIED FACILITY</span>
-            <h2 style="margin-bottom: 5px;">${fatherCentre.name}</h2>
-            <p style="margin: 5px 0;">📍 ${fatherCentre.address}</p>
-            <p style="margin: 5px 0;">📞 <a href="tel:${fatherCentre.phone}">${fatherCentre.phone}</a></p>
-            <p style="margin: 5px 0;">📏 <strong>${distToFather} km from search area</strong></p>
-            <a href="https://www.google.com/maps/search/?api=1&query=${fatherCentre.lat},${fatherCentre.lon}" target="_blank" style="display: inline-block; background: #4285F4; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 10px;">Get Directions</a>
-        </div>
-        <hr style="border-top: 1px dashed #ccc; margin: 20px 0;">
-        <h3>Other Nearby Facilities</h3>
-    `;
-
-    // 3. Broad Overpass Query (Clinics, Hospitals, Doctors)
+    // 2. Fetch Nearby Data
     const query = `[out:json];
         (
           node["amenity"="hospital"](around:20000,${targetLat},${targetLon});
@@ -93,25 +78,60 @@ function displayAll(targetLat, targetLon) {
     fetch(overpassUrl)
         .then(res => res.json())
         .then(data => {
-            if (!data.elements || data.elements.length === 0) {
-                resultsContainer.innerHTML += "<p>No other medical centres found in this 20km radius.</p>";
-                return;
+            let allPlaces = [];
+
+            // Add Father's Centre to the list with its calculated distance
+            const dToFather = calculateDistance(targetLat, targetLon, fatherCentre.lat, fatherCentre.lon);
+            allPlaces.push({
+                name: fatherCentre.name,
+                address: fatherCentre.address,
+                phone: fatherCentre.phone,
+                lat: fatherCentre.lat,
+                lon: fatherCentre.lon,
+                distance: dToFather,
+                isFeatured: true // We can keep a small badge but not force it to the top
+            });
+
+            // Add Overpass results to the list
+            if (data.elements) {
+                data.elements.forEach(place => {
+                    if (place.tags && place.tags.name && place.tags.name !== fatherCentre.name) {
+                        const d = calculateDistance(targetLat, targetLon, place.lat, place.lon);
+                        allPlaces.push({
+                            name: place.tags.name,
+                            address: "Address available on map",
+                            phone: null,
+                            lat: place.lat,
+                            lon: place.lon,
+                            distance: d,
+                            isFeatured: false
+                        });
+                    }
+                });
             }
-            
-            data.elements.forEach(place => {
-                if (place.tags && place.tags.name && place.tags.name !== fatherCentre.name) {
-                    const d = calculateDistance(targetLat, targetLon, place.lat, place.lon).toFixed(2);
-                    resultsContainer.innerHTML += `
-                        <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 8px;">
-                            <h3 style="margin: 0;">${place.tags.name}</h3>
-                            <p style="margin: 5px 0; color: #666;">📏 ${d} km away</p>
-                            <a href="https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lon}" target="_blank" style="font-size: 0.9rem; color: #007bff; text-decoration: none;">View on Map</a>
-                        </div>
-                    `;
-                }
+
+            // 3. SORT the entire list by distance (Closest first)
+            allPlaces.sort((a, b) => a.distance - b.distance);
+
+            // 4. Render the Sorted List
+            allPlaces.forEach(place => {
+                const isMetro = place.isFeatured;
+                resultsContainer.innerHTML += `
+                    <div style="border: 1px solid ${isMetro ? '#007bff' : '#ddd'}; 
+                                padding: 15px; 
+                                margin-bottom: 10px; 
+                                border-radius: 8px; 
+                                background: ${isMetro ? '#f0f7ff' : '#fff'};">
+                        <h3 style="margin: 0;">${place.name} ${isMetro ? '⭐' : ''}</h3>
+                        <p style="margin: 5px 0; font-size: 0.9rem; color: #555;">${place.address}</p>
+                        <p style="margin: 5px 0;">📏 <strong>${place.distance.toFixed(2)} km away</strong></p>
+                        ${place.phone ? `<p style="margin: 5px 0;">📞 <a href="tel:${place.phone}">${place.phone}</a></p>` : ''}
+                        <a href="https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lon}" target="_blank" style="font-size: 0.9rem; color: #007bff; text-decoration: none; font-weight: bold;">Get Directions</a>
+                    </div>
+                `;
             });
         })
         .catch(err => {
-            resultsContainer.innerHTML += "<p>Could not load additional results.</p>";
+            resultsContainer.innerHTML += "<p>Could not load results. Please try again.</p>";
         });
 }
