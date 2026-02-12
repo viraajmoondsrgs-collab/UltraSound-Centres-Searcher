@@ -17,7 +17,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
-function findNearest() {
+function searchCentres() {
     console.log("Button clicked!");
     const resultsContainer = document.getElementById('results');
     
@@ -52,6 +52,10 @@ function findNearest() {
         fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query))
             .then(res => res.json())
             .then(data => {
+                if (!data.elements || data.elements.length === 0) {
+                    resultsContainer.innerHTML += "<p>No other centres found within 20km.</p>";
+                    return;
+                }
                 data.elements.forEach(place => {
                     if (place.tags && place.tags.name !== fatherCentre.name) {
                         const dist = calculateDistance(uLat, uLon, place.lat, place.lon).toFixed(2);
@@ -63,6 +67,9 @@ function findNearest() {
                         `;
                     }
                 });
+            })
+            .catch(err => {
+                resultsContainer.innerHTML += "<p>Error loading other centres.</p>";
             });
     }, (error) => {
         console.error(error);
