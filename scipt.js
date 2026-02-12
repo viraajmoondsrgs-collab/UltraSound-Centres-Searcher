@@ -8,6 +8,12 @@ const fatherCentre = {
 
 function findNearest() {
     const resultsContainer = document.getElementById('results');
+    
+    if (!resultsContainer) {
+        alert("Error: Could not find the results area in your HTML.");
+        return;
+    }
+
     resultsContainer.innerHTML = "<p>Locating...</p>";
 
     if (!navigator.geolocation) {
@@ -22,8 +28,9 @@ function findNearest() {
         resultsContainer.innerHTML = "";
         
         const d = calculateDistance(uLat, uLon, fatherCentre.lat, fatherCentre.lon).toFixed(2);
+        
         resultsContainer.innerHTML += `
-            <div class="centre-card featured" style="border: 3px solid #007bff; background-color: #e7f3ff; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+            <div class="centre-card featured" style="border: 3px solid #007bff; background-color: #e7f3ff; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: left;">
                 <span class="badge" style="background: #007bff; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem;">⭐ FEATURED CENTRE</span>
                 <h2 style="margin-top: 10px;">${fatherCentre.name}</h2>
                 <p>📍 ${fatherCentre.address}</p>
@@ -44,20 +51,23 @@ function findNearest() {
                     return;
                 }
                 data.elements.forEach(place => {
-                    if(place.tags.name !== fatherCentre.name) {
+                    if(place.tags && place.tags.name !== fatherCentre.name) {
                         const dist = calculateDistance(uLat, uLon, place.lat, place.lon).toFixed(2);
                         resultsContainer.innerHTML += `
-                            <div class="centre-card" style="padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px;">
+                            <div class="centre-card" style="padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; text-align: left;">
                                 <h3>${place.tags.name || "Diagnostic Centre"}</h3>
                                 <p>📏 ${dist} km away</p>
-                                <a href="https://www.openstreetmap.org/?mlat=${place.lat}&mlon=${place.lon}" target="_blank" class="maps-btn" style="color: #007bff; text-decoration: none;">View Map</a>
+                                <a href="https://www.openstreetmap.org/?mlat=${place.lat}&mlon=${place.lon}" target="_blank" style="color: #007bff; text-decoration: none;">View Map</a>
                             </div>
                         `;
                     }
                 });
+            })
+            .catch(err => {
+                resultsContainer.innerHTML += "<p>Error loading other centres.</p>";
             });
-    }, () => {
-        resultsContainer.innerHTML = "Location access denied. Please allow location to find distances.";
+    }, (error) => {
+        resultsContainer.innerHTML = "Location access denied. Please allow location to use this searcher.";
     });
 }
 
