@@ -1,9 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>UltraSound Center Searcher</title>
-<body>
-    <h1>This is just a test for git to upload something, adding something.</h1>
-</body>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UltraScan | Find Ultrasound Centres</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
+<body>
+
+    <header>
+        <h1>🔍 UltraScan</h1>
+        <p>Find trusted ultrasound centres near you</p>
+    </header>
+
+    <main>
+        <section class="search-section">
+            <input type="text" id="citySearch" placeholder="Enter your city (e.g. London, New York)...">
+            <button onclick="searchCentres()">Search</button>
+        </section>
+
+        <section id="results" class="results-grid">
+            <div class="centre-card">
+                <h3>City Central Imaging</h3>
+                <p>Location: 123 Health St.</p>
+                <p>Status: <span class="open">Open Now</span></p>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
 </html>
