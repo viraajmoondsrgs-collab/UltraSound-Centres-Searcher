@@ -3,33 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UltraScan | Find Ultrasound Centres</title>
+    <title>Metro Ultrasound & Diagnostic Finder</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; line-height: 1.6; }
+        .search-controls { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+        input { padding: 10px; border: 1px solid #ccc; border-radius: 5px; flex-grow: 1; min-width: 200px; }
+        button { padding: 10px 20px; cursor: pointer; border-radius: 5px; border: none; background: #007bff; color: white; transition: 0.3s; }
+        button:hover { background: #0056b3; }
+        .gps-btn { background: #28a745; }
+        .gps-btn:hover { background: #218838; }
+        hr { margin: 30px 0; border: 0; border-top: 1px solid #eee; }
+        .centre-card { transition: transform 0.2s; }
+        .centre-card:hover { transform: translateY(-2px); }
+    </style>
 </head>
 <body>
 
-    <header>
-        <h1>🔍 UltraScan</h1>
-        <p>Find trusted ultrasound centres near you</p>
-    </header>
+    <h1>Find Ultrasound Centres</h1>
+    
+    <div class="search-controls">
+        <input type="text" id="searchInput" placeholder="Enter city (e.g. Rohtak, Gurugram)">
+        <button onclick="searchByText()">Search City</button>
+        <button onclick="useDeviceLocation()" class="gps-btn">Use Device Location</button>
+    </div>
 
-    <main>
-        <section class="search-section">
-            <input type="text" id="citySearch" placeholder="Enter your city (e.g. London, New York)...">
-            <button onclick="searchCentres()">Search</button>
-        </section>
-
-        <section id="results" class="results-grid">
-            <div class="centre-card">
-                <h3>City Central Imaging</h3>
-                <p>Location: 123 Health St.</p>
-                <p>Status: <span class="open">Open Now</span></p>
-            </div>
-        </section>
-    </main>
+    <div id="results">
+        </div>
 
     <script src="script.js"></script>
+
 </body>
 </html>
